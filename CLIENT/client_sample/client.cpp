@@ -298,12 +298,12 @@ void client_initialize()
 	white_tile = OBJECT{ *board, 5, 5, TILE_WIDTH, TILE_WIDTH };
 	black_tile = OBJECT{ *board, 5, 5, TILE_WIDTH, TILE_WIDTH };
 	avatar = OBJECT{ *pieces, 192, 0, 64, 64 };
-	for (int i = MAX_USER; i < (MAX_USER + MAX_NPC) / 2; ++i) {
-		players[i] = OBJECT{ *pieces, 0, 0, 64, 64 };
-	}
-	for (int i = (MAX_USER + MAX_NPC) / 2; i < MAX_USER + MAX_NPC; ++i) {
-		players[i] = OBJECT{ *pieces, 64, 0, 64, 64 };
-	}
+	//for (int i = MAX_USER; i < (MAX_USER + MAX_NPC) / 2; ++i) {
+	//	players[i] = OBJECT{ *pieces, 0, 0, 64, 64 };
+	//}
+	//for (int i = (MAX_USER + MAX_NPC) / 2; i < MAX_USER + MAX_NPC; ++i) {
+	//	players[i] = OBJECT{ *pieces, 64, 0, 64, 64 };
+	//}
 }
 
 void client_finish()

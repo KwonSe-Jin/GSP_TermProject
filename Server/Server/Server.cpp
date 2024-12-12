@@ -363,18 +363,19 @@ void process_packet(int c_id, char* packet)
 		break;
 	}
 	case CS_LOGIN: {
-		//CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-		//{
-		//	lock_guard<mutex> ll{ clients[c_id]._s_lock };
-
-		//	clients[c_id]._state = ST_INGAME;
-		//}
-		//strcpy_s(g_name, p->name);
-		//// DB 작업 큐에 추가
-		//DB_EVENT db_event{ c_id, DB_LOGIN, p->name };
-		//db_queue.Push(db_event);
-		//cout << p->name << " 로그인 요청" << endl;
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
+		{
+			lock_guard<mutex> ll{ clients[c_id]._s_lock };
+
+			clients[c_id]._state = ST_INGAME;
+			strcpy_s(clients[c_id]._name, p->name);
+		}
+		//strcpy_s(g_name, p->name);
+		// DB 작업 큐에 추가
+		DB_EVENT db_event{ c_id, DB_LOGIN, p->name };
+		db_queue.Push(db_event);
+		//cout << p->name << " 로그인 요청" << endl;
+		/*CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		strcpy_s(clients[c_id]._name, p->name);
 		{
 			lock_guard<mutex> ll{ clients[c_id]._s_lock };
@@ -410,7 +411,7 @@ void process_packet(int c_id, char* packet)
 					clients[c_id].send_add_player_packet(p_id);
 				}
 			}
-		}
+		}*/
 		break;
 	}
 	case CS_MOVE: {
@@ -1192,21 +1193,22 @@ void worker_thread(HANDLE h_iocp)
 		}
 					   break;
 		case OP_LOGIN_SUCC: {
-			lock_guard<mutex> ll{ clients[key]._s_lock };
+			{
+				lock_guard<mutex> ll{ clients[key]._s_lock };
 
-			g_x = clients[key].x;
-			g_y = clients[key].y;
+				g_x = clients[key].x;
+				g_y = clients[key].y;
 
 
-			cout << clients[key]._name << " 로그인 성공" << endl;
+				cout << clients[key]._name << " 로그인 성공" << endl;
 
-			// 섹터 등록 및 주변 객체 알림 처리
-			clients[key]._sector_x = clients[key].x / SECTOR_WIDTH;
-			clients[key]._sector_y = clients[key].y / SECTOR_HEIGHT;
-			sector_locks[clients[key]._sector_x][clients[key]._sector_y].lock();
-			g_sectors[clients[key]._sector_x][clients[key]._sector_y].insert(key);
-			sector_locks[clients[key]._sector_x][clients[key]._sector_y].unlock();
-
+				// 섹터 등록 및 주변 객체 알림 처리
+				clients[key]._sector_x = clients[key].x / SECTOR_WIDTH;
+				clients[key]._sector_y = clients[key].y / SECTOR_HEIGHT;
+				sector_locks[clients[key]._sector_x][clients[key]._sector_y].lock();
+				g_sectors[clients[key]._sector_x][clients[key]._sector_y].insert(key);
+				sector_locks[clients[key]._sector_x][clients[key]._sector_y].unlock();
+			}
 			clients[key].send_login_info_packet();
 			clients[key].send_inventory_packet(key);
 			for (int y = max(clients[key]._sector_y - 1, 0); y <= min(clients[key]._sector_y + 1, SECTOR_ROWS - 1); ++y) {
@@ -1228,31 +1230,32 @@ void worker_thread(HANDLE h_iocp)
 		}
 						  break;
 		case OP_LOGIN_FAIL: {
-			lock_guard<mutex> ll{ clients[key]._s_lock };
+			{
+				lock_guard<mutex> ll{ clients[key]._s_lock };
 
-			clients[key].x = rand() % W_WIDTH;
-			clients[key].y = rand() % W_HEIGHT;
-			strcpy_s(clients[key]._name, g_name);
+				clients[key].x = rand() % W_WIDTH;
+				clients[key].y = rand() % W_HEIGHT;
+				//strcpy_s(clients[key]._name, g_name);
 
-			clients[key]._level = 1;
-			clients[key]._atk = 10;
-			clients[key]._exp = 0;
-			clients[key]._max_hp = 100;
-			clients[key]._hp = 100;
-			clients[key]._max_exp = 100;
-			g_x = clients[key].x;
-			g_y = clients[key].y;
+				clients[key]._level = 1;
+				clients[key]._atk = 10;
+				clients[key]._exp = 0;
+				clients[key]._max_hp = 100;
+				clients[key]._hp = 100;
+				clients[key]._max_exp = 100;
+				g_x = clients[key].x;
+				g_y = clients[key].y;
 
-			cout << g_name << " 기본 데이터 생성 및 로그인 성공" << endl;
+				cout << g_name << " 기본 데이터 생성 및 로그인 성공" << endl;
 
-			// 섹터 등록 및 주변 객체 알림 처리 (위와 동일)
-			clients[key]._sector_x = clients[key].x / SECTOR_WIDTH;
-			clients[key]._sector_y = clients[key].y / SECTOR_HEIGHT;
-			sector_locks[clients[key]._sector_x][clients[key]._sector_y].lock();
-			g_sectors[clients[key]._sector_x][clients[key]._sector_y].insert(key);
-			sector_locks[clients[key]._sector_x][clients[key]._sector_y].unlock();
+				// 섹터 등록 및 주변 객체 알림 처리 (위와 동일)
+				clients[key]._sector_x = clients[key].x / SECTOR_WIDTH;
+				clients[key]._sector_y = clients[key].y / SECTOR_HEIGHT;
+				sector_locks[clients[key]._sector_x][clients[key]._sector_y].lock();
+				g_sectors[clients[key]._sector_x][clients[key]._sector_y].insert(key);
+				sector_locks[clients[key]._sector_x][clients[key]._sector_y].unlock();
 
-
+			}
 			clients[key].send_login_info_packet();
 			for (int y = max(clients[key]._sector_y - 1, 0); y <= min(clients[key]._sector_y + 1, SECTOR_ROWS - 1); ++y) {
 				for (int x = max(clients[key]._sector_x - 1, 0); x <= min(clients[key]._sector_x + 1, SECTOR_COLS - 1); ++x) {
@@ -1270,6 +1273,7 @@ void worker_thread(HANDLE h_iocp)
 					}
 				}
 			}
+
 			break;
 		}
 		}
