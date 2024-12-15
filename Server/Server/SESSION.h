@@ -1,6 +1,12 @@
 #pragma once
 #include "pch.h"
 
+class Obstacle {
+public:
+	short x, y;
+	int id;
+};
+
 class SESSION {
 
 public:

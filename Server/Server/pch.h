@@ -43,6 +43,7 @@ extern SOCKET g_c_socket;
 extern OVER_EXP g_a_over;
 extern array<array<unordered_set<int>, SECTOR_ROWS>, SECTOR_COLS> g_sectors;
 extern array<array<mutex, SECTOR_ROWS>, SECTOR_COLS> sector_locks;
+extern array<Obstacle, MAX_OBSTACLE> obstacles;
 
 
 bool is_pc(int object_id);

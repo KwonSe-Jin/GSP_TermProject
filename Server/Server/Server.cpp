@@ -995,7 +995,33 @@ void InitializeNPC()
 }
 void InitializeObstacle()
 {
+	  cout << "obstacle initialize begin.\n";
 
+
+
+
+	for (int i = 0; i < 10000; ++i) {
+		short x = rand() % W_WIDTH;
+		short y = rand() % W_HEIGHT;
+
+		bool isSamePos = false;
+		for (int j = 0; j < clients.size(); ++j) {
+			if (x == clients[j].x && y == clients[j].y) {
+				isSamePos = true;
+				break;
+			}
+		}
+
+		if (isSamePos) {
+			i--;
+			continue;
+		}
+
+		obstacles[i].x = x;
+		obstacles[i].y = y;
+		obstacles[i].id = i;
+	}
+	cout << "obstacle initialize end.\n";
 }
 void do_timer()
 {
