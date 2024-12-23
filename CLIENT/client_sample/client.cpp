@@ -666,16 +666,9 @@ int main()
 	}
 
 	client_initialize();
-	//CS_LOGIN_PACKET p;
-	//p.size = sizeof(p);
-	//p.type = CS_LOGIN;
-
-	//string player_name{ "P" };
-	//player_name += to_string(GetCurrentProcessId());
-
-	//strcpy_s(p.name, player_name.c_str());
+	
 	send_login_packet();
-	//
+	
 
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "2D CLIENT");
 	g_window = &window;
