@@ -2,7 +2,6 @@
 
 
 short g_x, g_y;
-char g_name[20];
 
 struct TIMER_EVENT {
 	int obj_id;
@@ -335,48 +334,10 @@ void process_packet(int c_id, char* packet)
 			clients[c_id]._state = ST_INGAME;
 			strcpy_s(clients[c_id]._name, p->name);
 		}
-		//strcpy_s(g_name, p->name);
 		// DB 작업 큐에 추가
 		DB_EVENT db_event{ c_id, DB_LOGIN, p->name };
 		db_queue.push(db_event);
-		//cout << p->name << " 로그인 요청" << endl;
-		/*CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-		strcpy_s(clients[c_id]._name, p->name);
-		{
-			lock_guard<mutex> ll{ clients[c_id]._s_lock };
-			clients[c_id].x = rand() % W_WIDTH;
-			clients[c_id].y = rand() % W_HEIGHT;
-			clients[c_id]._state = ST_INGAME;
-			clients[c_id]._sector_x = clients[c_id].x / SECTOR_WIDTH;
-			clients[c_id]._sector_y = clients[c_id].y / SECTOR_HEIGHT;
-			clients[c_id]._exp = 0;
-			clients[c_id]._max_exp = 100;
-			clients[c_id]._hp = 100;
-			clients[c_id]._max_hp = 100;
-			clients[c_id]._level = 1;
-			clients[c_id]._atk = 10;
-
-			sector_locks[clients[c_id]._sector_x][clients[c_id]._sector_y].lock();
-			g_sectors[clients[c_id]._sector_x][clients[c_id]._sector_y].insert(c_id);
-			sector_locks[clients[c_id]._sector_x][clients[c_id]._sector_y].unlock();
-		}
-		clients[c_id].send_login_info_packet();
-		for (int y = max(clients[c_id]._sector_y - 1, 0); y <= min(clients[c_id]._sector_y + 1, SECTOR_ROWS - 1); ++y) {
-			for (int x = max(clients[c_id]._sector_x - 1, 0); x <= min(clients[c_id]._sector_x + 1, SECTOR_COLS - 1); ++x) {
-				lock_guard<mutex> lock(sector_locks[x][y]);
-				for (int p_id : g_sectors[x][y]) {
-					{
-						lock_guard<mutex> ll(clients[p_id]._s_lock);
-						if (ST_INGAME != clients[p_id]._state) continue;
-					}
-					if (p_id == c_id) continue;
-					if (false == can_see(c_id, p_id)) continue;
-					if (is_pc(p_id)) clients[p_id].send_add_player_packet(c_id);
-					else WakeUpNPC(p_id, c_id);
-					clients[c_id].send_add_player_packet(p_id);
-				}
-			}
-		}*/
+	
 		break;
 	}
 	case CS_MOVE: {
@@ -1045,7 +1006,6 @@ void do_DB() {
 			switch (db_event.db_type) {
 			case DB_LOGIN: {
 				if (DB_odbc(db_event.client_id, db_event.name.c_str())) {
-					// 성공 시 IOCP로 완료 알림
 					cout << "성공" << endl;
 					OVER_EXP* ov = new OVER_EXP;
 					ov->_comp_type = OP_LOGIN_SUCC;
@@ -1053,7 +1013,6 @@ void do_DB() {
 				}
 				else {
 					// 실패 시 기본 데이터 설정
-					cout << "실패" << endl;
 					OVER_EXP* ov = new OVER_EXP;
 					ov->_comp_type = OP_LOGIN_FAIL;
 					PostQueuedCompletionStatus(h_iocp, 1, db_event.client_id, &ov->_over);
@@ -1226,8 +1185,7 @@ void worker_thread(HANDLE h_iocp)
 
 				clients[key].x = rand() % W_WIDTH;
 				clients[key].y = rand() % W_HEIGHT;
-				//strcpy_s(clients[key]._name, g_name);
-
+				
 				clients[key]._level = 1;
 				clients[key]._atk = 10;
 				clients[key]._exp = 0;
@@ -1236,8 +1194,6 @@ void worker_thread(HANDLE h_iocp)
 				clients[key]._max_exp = 100;
 				g_x = clients[key].x;
 				g_y = clients[key].y;
-
-				cout << g_name << " 기본 데이터 생성 및 로그인 성공" << endl;
 
 				// 섹터 등록 및 주변 객체 알림 처리 (위와 동일)
 				clients[key]._sector_x = clients[key].x / SECTOR_WIDTH;
