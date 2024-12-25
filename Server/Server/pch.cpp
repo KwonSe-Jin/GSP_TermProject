@@ -2,7 +2,7 @@
 
 
 HANDLE h_iocp;
-std::array<SESSION, MAX_USER + MAX_NPC> clients;
+std::array<SESSION, MAX_USER + MAX_NPC + MAX_OBSTACLE> clients;
 std::array<array<unordered_set<int>, SECTOR_ROWS>, SECTOR_COLS> g_sectors;
 std::array<array<mutex, SECTOR_ROWS>, SECTOR_COLS> sector_locks;
 std::array<Obstacle, MAX_OBSTACLE> obstacles;

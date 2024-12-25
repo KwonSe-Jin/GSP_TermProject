@@ -921,32 +921,20 @@ void InitializeNPC()
 }
 void InitializeObstacle()
 {
-	  cout << "obstacle initialize begin.\n";
+	cout << "obstacle initialize begin.\n";
 
-
-
-
-	for (int i = 0; i < 10000; ++i) {
-		short x = rand() % W_WIDTH;
-		short y = rand() % W_HEIGHT;
-
-		bool isSamePos = false;
-		for (int j = 0; j < clients.size(); ++j) {
-			if (x == clients[j].x && y == clients[j].y) {
-				isSamePos = true;
-				break;
-			}
-		}
-
-		if (isSamePos) {
-			i--;
-			continue;
-		}
-
-		obstacles[i].x = x;
-		obstacles[i].y = y;
-		obstacles[i].id = i;
+	for (int i = MAX_USER + MAX_NPC; i < MAX_USER + MAX_NPC + MAX_OBSTACLE; i++)
+	{
+		clients[i].x = rand() % W_WIDTH;
+		clients[i].y = rand() % W_HEIGHT;
+		clients[i]._id = i;
+		clients[i]._sector_x = clients[i].x / SECTOR_WIDTH;
+		clients[i]._sector_y = clients[i].y / SECTOR_HEIGHT;
+		sector_locks[clients[i]._sector_x][clients[i]._sector_y].lock();
+		g_sectors[clients[i]._sector_x][clients[i]._sector_y].insert(i);
+		sector_locks[clients[i]._sector_x][clients[i]._sector_y].unlock();
 	}
+
 	cout << "obstacle initialize end.\n";
 }
 void do_timer()

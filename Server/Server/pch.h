@@ -37,7 +37,7 @@ enum S_STATE { ST_FREE, ST_ALLOC, ST_INGAME };
 
 
 extern HANDLE h_iocp;
-extern std::array<SESSION, MAX_USER + MAX_NPC> clients; 
+extern std::array<SESSION, MAX_USER + MAX_NPC + MAX_OBSTACLE> clients; 
 extern SOCKET g_s_socket;
 extern SOCKET g_c_socket;
 extern OVER_EXP g_a_over;

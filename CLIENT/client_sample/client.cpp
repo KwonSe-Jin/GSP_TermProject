@@ -298,12 +298,6 @@ void client_initialize()
 	white_tile = OBJECT{ *board, 5, 5, TILE_WIDTH, TILE_WIDTH };
 	black_tile = OBJECT{ *board, 5, 5, TILE_WIDTH, TILE_WIDTH };
 	avatar = OBJECT{ *pieces, 192, 0, 64, 64 };
-	//for (int i = MAX_USER; i < (MAX_USER + MAX_NPC) / 2; ++i) {
-	//	players[i] = OBJECT{ *pieces, 0, 0, 64, 64 };
-	//}
-	//for (int i = (MAX_USER + MAX_NPC) / 2; i < MAX_USER + MAX_NPC; ++i) {
-	//	players[i] = OBJECT{ *pieces, 64, 0, 64, 64 };
-	//}
 }
 
 void client_finish()
@@ -385,6 +379,10 @@ void ProcessPacket(char* ptr)
 			players[id].set_name(my_packet->name);
 			players[id].show();
 		}
+		else
+		{
+			obstacles.push_back(OBSTACLE(my_packet->x, my_packet->y, my_packet->id, obstacle));
+		}
 		break;
 	}
 	case SC_MOVE_OBJECT:
@@ -411,6 +409,7 @@ void ProcessPacket(char* ptr)
 		else {
 			players.erase(other_id);
 		}
+		// 장애물 이라면 장애물 erase;
 		break;
 	}
 	case SC_CHAT:

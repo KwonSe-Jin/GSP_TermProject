@@ -5,7 +5,7 @@ constexpr int CHAT_SIZE = 300;
 
 constexpr int MAX_USER = 10000;
 constexpr int MAX_NPC = 200000;
-constexpr int MAX_OBSTACLE = 0;
+constexpr int MAX_OBSTACLE = 50000;
 
 
 
