@@ -1,40 +1,5 @@
 #include "pch.h"
 
-template<typename T>
-class LockQueue
-{
-public:
-	LockQueue() { }
-
-	LockQueue(const LockQueue&) = delete;
-	LockQueue& operator=(const LockQueue&) = delete;
-
-	void Push(T value)
-	{
-		lock_guard<mutex> lock(_mutex);
-		_queue.push(std::move(value));
-		_condVar.notify_one();
-	}
-	bool TryPop(T& value)
-	{
-		lock_guard<mutex> lock(_mutex);
-		if (_queue.empty())
-			return false;
-
-		value = std::move(_queue.front());
-		_queue.pop();
-		return true;
-	}
-	bool Empty()
-	{
-		lock_guard<mutex> lock(_mutex);
-		return _queue.empty();
-	}
-private:
-	queue<T> _queue;
-	mutex _mutex;
-	condition_variable _condVar;
-};
 
 short g_x, g_y;
 char g_name[20];
@@ -49,14 +14,14 @@ struct TIMER_EVENT {
 		return (wakeup_time > L.wakeup_time);
 	}
 };
-LockQueue<TIMER_EVENT> timer_queue;
+concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
 struct DB_EVENT {
 	int client_id;                           // 작업 대상 클라이언트 ID
 	DB_TYPE db_type;                         // 작업 타입 (DB_LOAD, DB_SAVE)
 	std::string name;                        // 작업에 필요한 추가 데이터 (예: 유저 이름)
 };
-LockQueue<DB_EVENT> db_queue;
+concurrency::concurrent_queue<DB_EVENT> db_queue;
 
 void show_err() {
 	cout << "error" << endl;
@@ -275,7 +240,7 @@ void process_packet(int c_id, char* packet)
 	switch (packet[2]) {
 	case CS_LOGOUT: {
 		DB_EVENT db_event{ c_id, DB_SAVE, "" };
-		db_queue.Push(db_event);
+		db_queue.push(db_event);
 		cout << "클라이언트 " << c_id << " 로그아웃 및 데이터 저장 요청" << endl;
 		break;
 	}
@@ -337,7 +302,7 @@ void process_packet(int c_id, char* packet)
 				continue;
 			if (true == is_npc(pl._id)) {
 				TIMER_EVENT ev1{ pl._id,  chrono::system_clock::now() + 1s , EV_PLAYER_ATTACK, c_id };
-				timer_queue.Push(ev1);
+				timer_queue.push(ev1);
 			}
 		}
 		break;
@@ -357,7 +322,7 @@ void process_packet(int c_id, char* packet)
 			if (true == is_npc(pl._id)) {
 
 				TIMER_EVENT ev1{ pl._id,  chrono::system_clock::now() + 1s , EV_PLAYER_ATTACK, c_id };
-				timer_queue.Push(ev1);
+				timer_queue.push(ev1);
 			}
 		}
 		break;
@@ -373,7 +338,7 @@ void process_packet(int c_id, char* packet)
 		//strcpy_s(g_name, p->name);
 		// DB 작업 큐에 추가
 		DB_EVENT db_event{ c_id, DB_LOGIN, p->name };
-		db_queue.Push(db_event);
+		db_queue.push(db_event);
 		//cout << p->name << " 로그인 요청" << endl;
 		/*CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		strcpy_s(clients[c_id]._name, p->name);
@@ -762,7 +727,7 @@ void do_npc_attack(int npc_id, int user_id)
 				{
 					clients[pl]._is_active = false;
 					TIMER_EVENT ev1{ pl,  chrono::system_clock::now() + 3s , EV_RESPAWN, pl };
-					timer_queue.Push(ev1);
+					timer_queue.push(ev1);
 				}
 			}
 			/*  if (!clients[npc_id]._isattack) {
@@ -851,7 +816,7 @@ int API_attack_npc(lua_State* L)
 			if (!clients[my_id]._isattack) {
 				clients[my_id]._isattack = true;
 				TIMER_EVENT ev1{ my_id,  chrono::system_clock::now() + 1s , EV_NPC_ATTACK, user_id };
-				timer_queue.Push(ev1);
+				timer_queue.push(ev1);
 			}
 		}
 	}
@@ -895,15 +860,15 @@ int API_move_npc(lua_State* L)
 
 	auto now = chrono::system_clock::now();
 	TIMER_EVENT ev{ my_id, now + 1s, EV_NPC_MOVE, user_id };
-	timer_queue.Push(ev);
+	timer_queue.push(ev);
 	TIMER_EVENT ev1{ my_id, now + 2s, EV_NPC_MOVE, user_id };
-	timer_queue.Push(ev1);
+	timer_queue.push(ev1);
 	TIMER_EVENT ev2{ my_id, now + 3s, EV_NPC_MOVE, user_id };
-	timer_queue.Push(ev2);
+	timer_queue.push(ev2);
 	TIMER_EVENT ev3{ my_id, now + 4s, EV_NPC_MOVE, user_id };
-	timer_queue.Push(ev3);
+	timer_queue.push(ev3);
 	TIMER_EVENT ev4{ my_id, now + 5s, EV_NPC_MOVE, user_id };
-	timer_queue.Push(ev4);
+	timer_queue.push(ev4);
 
 	return 0;
 }
@@ -1026,10 +991,10 @@ void InitializeObstacle()
 void do_timer()
 {
 	while (true) {
-		while (!timer_queue.Empty())
+		while (!timer_queue.empty())
 		{
 			TIMER_EVENT ev;
-			if (true == timer_queue.TryPop(ev)) {
+			if (true == timer_queue.try_pop(ev)) {
 				if (ev.wakeup_time <= chrono::system_clock::now()) {
 					if (ev.event_id == EV_NPC_MOVE) {
 						OVER_EXP* ov = new OVER_EXP;
@@ -1065,7 +1030,7 @@ void do_timer()
 					continue;
 				}
 				else {
-					timer_queue.Push(ev);
+					timer_queue.push(ev);
 					this_thread::sleep_for(1ms);
 					continue;
 				}
@@ -1076,7 +1041,7 @@ void do_timer()
 void do_DB() {
 	while (true) {
 		DB_EVENT db_event;
-		if (db_queue.TryPop(db_event)) {
+		if (db_queue.try_pop(db_event)) {
 			switch (db_event.db_type) {
 			case DB_LOGIN: {
 				if (DB_odbc(db_event.client_id, db_event.name.c_str())) {
@@ -1322,7 +1287,7 @@ int main()
 	int addr_size = sizeof(cl_addr);
 
 	InitializeNPC();
-	InitializeObstacle();
+	//InitializeObstacle();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_s_socket), h_iocp, 9999, 0);
 	g_c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LockQueue.cpp" />
     <ClCompile Include="OVERLAP.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Server.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="include\lua.hpp" />
     <ClInclude Include="include\luaconf.h" />
     <ClInclude Include="include\lualib.h" />
+    <ClInclude Include="LockQueue.h" />
     <ClInclude Include="OVERLAP.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="protocol.h" />
