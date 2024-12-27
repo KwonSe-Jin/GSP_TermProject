@@ -49,6 +49,7 @@ extern array<Obstacle, MAX_OBSTACLE> obstacles;
 bool is_pc(int object_id);
 
 bool is_npc(int object_id);
+bool is_obstacle(int object_id);
 
 bool can_see(int from, int to);
 bool is_range(int range, int from, int to);

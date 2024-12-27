@@ -414,7 +414,9 @@ void process_packet(int c_id, char* packet)
 					clients[pl].send_add_player_packet(c_id);
 				}
 			}
-			else WakeUpNPC(pl, c_id);
+			else if (is_npc(pl)) {
+				WakeUpNPC(pl, c_id); // NPC∏∏ »£√‚
+			}
 
 			if (old_vlist.count(pl) == 0)
 				clients[c_id].send_add_player_packet(pl);
@@ -928,6 +930,7 @@ void InitializeObstacle()
 		clients[i].x = rand() % W_WIDTH;
 		clients[i].y = rand() % W_HEIGHT;
 		clients[i]._id = i;
+		clients[i]._state = ST_INGAME;
 		clients[i]._sector_x = clients[i].x / SECTOR_WIDTH;
 		clients[i]._sector_y = clients[i].y / SECTOR_HEIGHT;
 		sector_locks[clients[i]._sector_x][clients[i]._sector_y].lock();
@@ -1160,7 +1163,8 @@ void worker_thread(HANDLE h_iocp)
 						if (p_id == key) continue;
 						if (false == can_see(key, p_id)) continue;
 						if (is_pc(p_id)) clients[p_id].send_add_player_packet(key);
-						else WakeUpNPC(p_id, key);
+						else if (is_npc(p_id))
+							WakeUpNPC(p_id, key);
 						clients[key].send_add_player_packet(p_id);
 					}
 				}
@@ -1203,7 +1207,8 @@ void worker_thread(HANDLE h_iocp)
 						if (p_id == key) continue;
 						if (false == can_see(key, p_id)) continue;
 						if (is_pc(p_id)) clients[p_id].send_add_player_packet(key);
-						else WakeUpNPC(p_id, key);
+						else if (is_npc(p_id))
+							WakeUpNPC(p_id, key);
 						clients[key].send_add_player_packet(p_id);
 					}
 				}
@@ -1231,7 +1236,7 @@ int main()
 	int addr_size = sizeof(cl_addr);
 
 	InitializeNPC();
-	//InitializeObstacle();
+	InitializeObstacle();
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_s_socket), h_iocp, 9999, 0);
 	g_c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

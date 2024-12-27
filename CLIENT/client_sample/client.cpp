@@ -123,9 +123,8 @@ public:
 		sprite.setPosition(rx, ry);
 		w->draw(sprite);
 	}
-	void CollisionCheck()
-	{
-
+	int get_id() const {
+		return id;
 	}
 };
 
@@ -273,14 +272,16 @@ OBJECT black_tile;
 sf::Texture* board;
 sf::Texture* pieces;
 sf::Texture* item;
-
 sf::Texture* obstacle;
 
 std::vector<std::string> v;
 std::string inputMessage;
 
 Inventory* inventory;
-
+bool is_obstacle(int object_id)
+{
+	return (MAX_USER + MAX_NPC <= object_id && object_id < MAX_USER + MAX_NPC + MAX_OBSTACLE);
+}
 void client_initialize()
 {
 	board = new sf::Texture;
@@ -406,10 +407,22 @@ void ProcessPacket(char* ptr)
 		if (other_id == g_myid) {
 			avatar.hide();
 		}
+		else if(is_obstacle(other_id))
+		{
+			auto it = std::find_if(obstacles.begin(), obstacles.end(),
+				[other_id](const OBSTACLE& obstacle) {
+					return obstacle.get_id() == other_id;
+				});
+
+			if (it != obstacles.end()) {
+				std::cout << "Deleting obstacle: ID = " << it->get_id() << endl;
+				obstacles.erase(it);
+			};
+		}
 		else {
 			players.erase(other_id);
 		}
-		// 장애물 이라면 장애물 erase;
+		
 		break;
 	}
 	case SC_CHAT:
