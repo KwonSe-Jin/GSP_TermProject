@@ -342,7 +342,6 @@ void process_packet(int c_id, char* packet)
 	}
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		//unsigned current_time = get_current_time_in_ms();
 		SESSION& client = clients[c_id];
 
 		clients[c_id].last_move_time = p->move_time;
@@ -352,11 +351,28 @@ void process_packet(int c_id, char* packet)
 
 		bool isAbleDirection[4] = { true, true, true, true }; // UP RIGHT DOWN LEFT
 
+		// 이동 전에 장애물 확인
 		switch (p->direction) {
-		case 0: if (y > 0 && isAbleDirection[0]) y--; break;
-		case 1: if (y < W_HEIGHT - 1 && isAbleDirection[2]) y++; break;
-		case 2: if (x > 0 && isAbleDirection[3]) x--; break;
-		case 3: if (x < W_WIDTH - 1 && isAbleDirection[1]) x++; break;
+		case 0: // UP
+			if (y > 0 && isAbleDirection[0] && !is_obstacle(get_object_id(x, y - 1))) {
+				y--; 
+			}
+			break;
+		case 1: // DOWN
+			if (y < W_HEIGHT - 1 && isAbleDirection[2] && !is_obstacle(get_object_id(x, y + 1))) {
+				y++; 
+			}
+			break;
+		case 2: // LEFT
+			if (x > 0 && isAbleDirection[3] && !is_obstacle(get_object_id(x - 1, y))) {
+				x--; 
+			}
+			break;
+		case 3: // RIGHT
+			if (x < W_WIDTH - 1 && isAbleDirection[1] && !is_obstacle(get_object_id(x + 1, y))) {
+				x++; 
+			}
+			break;
 		}
 
 		clients[c_id].x = x;
@@ -384,8 +400,6 @@ void process_packet(int c_id, char* packet)
 		clients[c_id]._vl.lock();
 		unordered_set<int> old_vlist = clients[c_id]._view_list;
 		clients[c_id]._vl.unlock();
-
-
 
 		for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); ++y) {
 			for (int x = max(new_sector_x - 1, 0); x <= min(new_sector_x + 1, SECTOR_COLS - 1); ++x) {
@@ -429,11 +443,13 @@ void process_packet(int c_id, char* packet)
 					clients[pl].send_remove_player_packet(c_id);
 			}
 		}
+
 		clients[c_id]._vl.lock();
 		clients[c_id]._view_list = near_list;
 		clients[c_id]._vl.unlock();
 		break;
 	}
+
 
 	}
 }
@@ -851,7 +867,7 @@ int API_SendMessage(lua_State* L)
 
 void InitializeNPC()
 {
-	cout << "NPC intialize begin.\n";
+	cout << "NPC intialize begin" << endl;
 	for (int i = MAX_USER; i < (MAX_USER + MAX_NPC) / 2; ++i) {
 
 		clients[i].x = rand() % (W_WIDTH / 2); // 왼쪽 절반 영역에 위치
@@ -921,18 +937,48 @@ void InitializeNPC()
 	}
 	cout << "NPC initialize end.\n";
 }
+
+struct pair_hash
+{
+	template <class T1, class T2>
+	std::size_t operator() (const std::pair<T1, T2>& pair) const {
+		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+	}
+};
 void InitializeObstacle()
 {
 	cout << "obstacle initialize begin.\n";
 
-	for (int i = MAX_USER + MAX_NPC; i < MAX_USER + MAX_NPC + MAX_OBSTACLE; i++)
-	{
-		clients[i].x = rand() % W_WIDTH;
-		clients[i].y = rand() % W_HEIGHT;
+	// 점유된 위치를 추적
+
+	unordered_set<pair<short, short>, pair_hash> occupied;
+
+	// NPC 위치 기록
+	for (int i = MAX_USER; i < MAX_USER + MAX_NPC; ++i) {
+		occupied.emplace(clients[i].x, clients[i].y);
+	}
+
+	for (int i = MAX_USER + MAX_NPC; i < MAX_USER + MAX_NPC + MAX_OBSTACLE; ++i) {
+		short x, y;
+
+		// 장애물 위치 선정
+		do {
+			x = rand() % W_WIDTH;
+			y = rand() % W_HEIGHT;
+		} while (occupied.find({ x, y }) != occupied.end());
+
+		// 업데이트
+		occupied.emplace(x, y);
+
+		// 장애물 설정
+		clients[i].x = x;
+		clients[i].y = y;
 		clients[i]._id = i;
 		clients[i]._state = ST_INGAME;
 		clients[i]._sector_x = clients[i].x / SECTOR_WIDTH;
 		clients[i]._sector_y = clients[i].y / SECTOR_HEIGHT;
+
+		// 섹터에 등록
 		sector_locks[clients[i]._sector_x][clients[i]._sector_y].lock();
 		g_sectors[clients[i]._sector_x][clients[i]._sector_y].insert(i);
 		sector_locks[clients[i]._sector_x][clients[i]._sector_y].unlock();

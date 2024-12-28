@@ -24,7 +24,15 @@ bool is_obstacle(int object_id)
 {
 	return (MAX_USER + MAX_NPC <= object_id && object_id < MAX_USER + MAX_NPC + MAX_OBSTACLE);
 }
-
+// 좌표에 있는 object의 ID를 반환
+int get_object_id(short x, short y) {
+	for (int i = MAX_USER + MAX_NPC; i < MAX_USER + MAX_NPC + MAX_OBSTACLE; ++i) {
+		if (clients[i].x == x && clients[i].y == y) {
+			return i;
+		}
+	}
+	return -1; 
+}
 bool can_see(int from, int to)
 {
 	if (abs(clients[from].x - clients[to].x) > VIEW_RANGE) return false;
