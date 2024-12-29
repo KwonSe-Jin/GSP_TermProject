@@ -546,48 +546,58 @@ void do_npc_move(int npc_id, int player_id) {
 	int dy = 0;
 
 	bool isAbleDirection[4] = { true, true, true, true }; // UP RIGHT DOWN LEFT
-	//for (auto& obstacle : obstacles) {
-	//	const int dx = obstacle.x - x;
-	//	const int dy = obstacle.y - y;
+	if (is_obstacle(get_object_id(x, y - 1))) {
+		isAbleDirection[0] = false;
+	}
+	if (is_obstacle(get_object_id(x + 1, y))) { 
+		isAbleDirection[1] = false;
+	}
+	if (is_obstacle(get_object_id(x, y + 1))) { 
+		isAbleDirection[2] = false;
+	}
+	if (is_obstacle(get_object_id(x - 1, y))) { 
+		isAbleDirection[3] = false;
+	}
 
-	//	if (dx == 0) {
-	//		if (dy == -1) isAbleDirection[0] = false; // UP
-	//		else if (dy == 1) isAbleDirection[2] = false; // DOWN
-	//	}
-	//	else if (dy == 0) {
-	//		if (dx == -1) isAbleDirection[3] = false; // LEFT
-	//		else if (dx == 1) isAbleDirection[1] = false; // RIGHT
-	//	}
-	//}
-
+	// NPC가 player와 근접해 있는지 확인하고, 방향을 결정
 	if (abs(mx) == 0 && abs(my) == 1 || abs(mx) == 1 && abs(my) == 0 || abs(mx) == 0 && abs(my) == 0) {
-		// NPC가 제자리 혹은 바로 옆에 있을 때
+		// NPC가 이미 player 옆에 있으면 이동 안 함
 	}
 	else {
-		if (mx > 0 && isAbleDirection[1]) dx = 1;
-		else if (mx < 0 && isAbleDirection[3]) dx = -1;
-		else if (my > 0 && isAbleDirection[2]) dy = 1;
-		else if (my < 0 && isAbleDirection[0]) dy = -1;
+		// 목표 방향으로 이동할 수 있는지 확인
+		if (mx > 0 && isAbleDirection[1]) {  // RIGHT
+			dx = 1;
+		}
+		else if (mx < 0 && isAbleDirection[3]) {  // LEFT
+			dx = -1;
+		}
+		else if (my > 0 && isAbleDirection[2]) {  // DOWN
+			dy = 1;
+		}
+		else if (my < 0 && isAbleDirection[0]) {  // UP
+			dy = -1;
+		}
 		else {
+			// 장애물이 있는 방향을 피하고 다른 방향으로 이동 시도
 			if (mx > 0 && !isAbleDirection[1]) {
-				if (isAbleDirection[0]) dy = -1;
-				else if (isAbleDirection[2]) dy = 1;
-				else if (isAbleDirection[3]) dx = -1;
+				if (isAbleDirection[0]) dy = -1;  
+				else if (isAbleDirection[2]) dy = 1;  
+				else if (isAbleDirection[3]) dx = -1; 
 			}
 			else if (mx < 0 && !isAbleDirection[3]) {
-				if (isAbleDirection[0]) dy = -1;
-				else if (isAbleDirection[2]) dy = 1;
-				else if (isAbleDirection[1]) dx = 1;
+				if (isAbleDirection[0]) dy = -1;  
+				else if (isAbleDirection[2]) dy = 1;  
+				else if (isAbleDirection[1]) dx = 1;  
 			}
 			else if (my > 0 && !isAbleDirection[2]) {
-				if (isAbleDirection[1]) dx = 1;
-				else if (isAbleDirection[3]) dx = -1;
-				else if (isAbleDirection[0]) dy = -1;
+				if (isAbleDirection[1]) dx = 1;  
+				else if (isAbleDirection[3]) dx = -1; 
+				else if (isAbleDirection[0]) dy = -1; 
 			}
 			else if (my < 0 && !isAbleDirection[0]) {
-				if (isAbleDirection[1]) dx = 1;
-				else if (isAbleDirection[3]) dx = -1;
-				else if (isAbleDirection[2]) dy = 1;
+				if (isAbleDirection[1]) dx = 1;  
+				else if (isAbleDirection[3]) dx = -1; 
+				else if (isAbleDirection[2]) dy = 1; 
 			}
 		}
 	}
