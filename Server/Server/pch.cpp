@@ -20,18 +20,19 @@ bool is_npc(int object_id)
 {
 	return (MAX_USER <= object_id && object_id < MAX_USER + MAX_NPC);
 }
-bool is_obstacle(int object_id)
-{
-	return (MAX_USER + MAX_NPC <= object_id && object_id < MAX_USER + MAX_NPC + MAX_OBSTACLE);
-}
+
 // 좌표에 있는 object의 ID를 반환
-int get_object_id(short x, short y) {
-	for (int i = MAX_USER + MAX_NPC; i < MAX_USER + MAX_NPC + MAX_OBSTACLE; ++i) {
-		if (clients[i].x == x && clients[i].y == y) {
-			return i;
+bool is_obstacle(short x, short y) {
+	int sector_x = x / SECTOR_WIDTH;
+	int sector_y = y / SECTOR_HEIGHT;
+
+	// 해당 섹터 내에서 장애물만 검색
+	for (int id : g_sectors[sector_x][sector_y]) {
+		if (clients[id].x == x && clients[id].y == y && id >= MAX_USER + MAX_NPC) {
+			return true;
 		}
 	}
-	return -1; 
+	return false; 
 }
 bool can_see(int from, int to)
 {

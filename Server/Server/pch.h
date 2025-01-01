@@ -14,7 +14,8 @@
 #include <concurrent_priority_queue.h>
 #include <concurrent_queue.h>
 #include <random>
-#include <atomic>;
+#include <atomic>
+#include <limits>
 #include <shared_mutex>
 #include <windows.h>
 #include <sqlext.h>
@@ -49,8 +50,7 @@ extern array<Obstacle, MAX_OBSTACLE> obstacles;
 bool is_pc(int object_id);
 
 bool is_npc(int object_id);
-bool is_obstacle(int object_id);
-int get_object_id(short x, short y); 
+bool is_obstacle(short x, short y);
 bool can_see(int from, int to);
 bool is_range(int range, int from, int to);
 bool is_adjacent(int range, int from, int to);

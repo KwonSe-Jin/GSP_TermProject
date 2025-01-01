@@ -199,6 +199,80 @@ bool DB_save(int c_id) {
 	return (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO);
 }
 
+struct pair_hash
+{
+	template <class T1, class T2>
+	std::size_t operator() (const std::pair<T1, T2>& pair) const {
+		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+	}
+};
+
+struct Node {
+	int x, y;
+	int f, g, h;
+
+	Node(int x, int y, int g, int h)
+		: x(x), y(y), g(g), h(h), f(g + h) {}
+
+	//  우선순위 큐에서는 f 값이 작은 순서대로 처리
+	bool operator<(const Node& other) const {
+		return f > other.f;
+	}
+};
+
+// 휴리스틱 함수: 맨하탄 거리 계산 (x1, y1에서 x2, y2까지의 거리)
+int heuristic(int x1, int y1, int x2, int y2) {
+	return abs(x1 - x2) + abs(y1 - y2);
+}
+
+// A* 알고리즘을 사용하여 경로를 찾는 함수
+vector<POINT> AStarFindPath(int startX, int startY, int goalX, int goalY) {
+	priority_queue<Node> openList;
+	unordered_map<pair<int, int>, pair<int, int>, pair_hash> previousNode;// 각 노드의 이전 노드 정보 저장
+	unordered_map<pair<int, int>, int, pair_hash> gCost;// 각 노드까지의 실제 비용 저장
+
+	openList.push(Node(startX, startY, 0, heuristic(startX, startY, goalX, goalY)));
+	previousNode[{startX, startY}] = { startX, startY };
+	gCost[{startX, startY}] = 0;
+
+	// 4방향(상, 하, 좌, 우) 이동을 위한 방향 벡터
+	static const int dx[] = { 0, 0, -1, 1 };
+	static const int dy[] = { -1, 1, 0, 0 };
+
+	while (!openList.empty()) {
+		Node current = openList.top(); // f 값이 가장 작은 노드를 꺼냄
+		openList.pop();
+
+		if (current.x == goalX && current.y == goalY) {
+			vector<POINT> path;
+			while (!(current.x == startX && current.y == startY)) {
+				path.push_back({ current.x, current.y });
+				auto prev = previousNode[{current.x, current.y}];
+				current.x = prev.first;
+				current.y = prev.second;
+			}
+			reverse(path.begin(), path.end());
+			return path;
+		}
+
+		for (int i = 0; i < 4; ++i) {
+			int nx = current.x + dx[i], ny = current.y + dy[i];
+			if (nx < 0 || ny < 0 || nx >= W_WIDTH || ny >= W_HEIGHT) continue;
+			if (is_obstacle(nx, ny)) continue;
+
+			// 새로운 노드까지의 비용 계산
+			int newCost = gCost[{current.x, current.y}] + 1;
+			if (!gCost.count({ nx, ny }) || newCost < gCost[{nx, ny}]) {
+				gCost[{nx, ny}] = newCost;
+				int priority = newCost + heuristic(nx, ny, goalX, goalY);
+				openList.push(Node(nx, ny, newCost, heuristic(nx, ny, goalX, goalY)));
+				previousNode[{nx, ny}] = { current.x, current.y }; // 해당 노드의 이전 노드 저장
+			}
+		}
+	}
+
+	return {};  // No path found
+}
 
 
 void send_item_drop_packet(int type, int npc_id)
@@ -337,7 +411,7 @@ void process_packet(int c_id, char* packet)
 		// DB 작업 큐에 추가
 		DB_EVENT db_event{ c_id, DB_LOGIN, p->name };
 		db_queue.push(db_event);
-	
+
 		break;
 	}
 	case CS_MOVE: {
@@ -354,23 +428,23 @@ void process_packet(int c_id, char* packet)
 		// 이동 전에 장애물 확인
 		switch (p->direction) {
 		case 0: // UP
-			if (y > 0 && isAbleDirection[0] && !is_obstacle(get_object_id(x, y - 1))) {
-				y--; 
+			if (y > 0 && isAbleDirection[0] && !is_obstacle(x, y - 1)) {
+				y--;
 			}
 			break;
 		case 1: // DOWN
-			if (y < W_HEIGHT - 1 && isAbleDirection[2] && !is_obstacle(get_object_id(x, y + 1))) {
-				y++; 
+			if (y < W_HEIGHT - 1 && isAbleDirection[2] && !is_obstacle(x, y + 1)) {
+				y++;
 			}
 			break;
 		case 2: // LEFT
-			if (x > 0 && isAbleDirection[3] && !is_obstacle(get_object_id(x - 1, y))) {
-				x--; 
+			if (x > 0 && isAbleDirection[3] && !is_obstacle(x - 1, y)) {
+				x--;
 			}
 			break;
 		case 3: // RIGHT
-			if (x < W_WIDTH - 1 && isAbleDirection[1] && !is_obstacle(get_object_id(x + 1, y))) {
-				x++; 
+			if (x < W_WIDTH - 1 && isAbleDirection[1] && !is_obstacle(x + 1, y)) {
+				x++;
 			}
 			break;
 		}
@@ -522,7 +596,11 @@ void disconnect(int c_id)
 	clients[c_id]._state = ST_FREE;
 }
 
-//npc 이동 함수
+
+
+// NPC 이동함수
+
+
 void do_npc_move(int npc_id, int player_id) {
 	SESSION& npc = clients[npc_id];
 	SESSION& player = clients[player_id];
@@ -539,69 +617,24 @@ void do_npc_move(int npc_id, int player_id) {
 	int x = npc.x;
 	int y = npc.y;
 
-	int mx = px - x;
-	int my = py - y;
+	// A* 알고리즘을 사용하여 NPC와 플레이어 간의 경로를 찾음
+	vector<POINT> path = AStarFindPath(x, y, px, py);
 
-	int dx = 0;
-	int dy = 0;
-
-	bool isAbleDirection[4] = { true, true, true, true }; // UP RIGHT DOWN LEFT
-	if (is_obstacle(get_object_id(x, y - 1))) {
-		isAbleDirection[0] = false;
-	}
-	if (is_obstacle(get_object_id(x + 1, y))) { 
-		isAbleDirection[1] = false;
-	}
-	if (is_obstacle(get_object_id(x, y + 1))) { 
-		isAbleDirection[2] = false;
-	}
-	if (is_obstacle(get_object_id(x - 1, y))) { 
-		isAbleDirection[3] = false;
+	// 경로가 없다면 이동하지 않음
+	if (path.empty()) {
+		return;
 	}
 
-	// NPC가 player와 근접해 있는지 확인하고, 방향을 결정
-	if (abs(mx) == 0 && abs(my) == 1 || abs(mx) == 1 && abs(my) == 0 || abs(mx) == 0 && abs(my) == 0) {
-		// NPC가 이미 player 옆에 있으면 이동 안 함
-	}
-	else {
-		// 목표 방향으로 이동할 수 있는지 확인
-		if (mx > 0 && isAbleDirection[1]) {  // RIGHT
-			dx = 1;
-		}
-		else if (mx < 0 && isAbleDirection[3]) {  // LEFT
-			dx = -1;
-		}
-		else if (my > 0 && isAbleDirection[2]) {  // DOWN
-			dy = 1;
-		}
-		else if (my < 0 && isAbleDirection[0]) {  // UP
-			dy = -1;
-		}
-		else {
-			// 장애물이 있는 방향을 피하고 다른 방향으로 이동 시도
-			if (mx > 0 && !isAbleDirection[1]) {
-				if (isAbleDirection[0]) dy = -1;  
-				else if (isAbleDirection[2]) dy = 1;  
-				else if (isAbleDirection[3]) dx = -1; 
-			}
-			else if (mx < 0 && !isAbleDirection[3]) {
-				if (isAbleDirection[0]) dy = -1;  
-				else if (isAbleDirection[2]) dy = 1;  
-				else if (isAbleDirection[1]) dx = 1;  
-			}
-			else if (my > 0 && !isAbleDirection[2]) {
-				if (isAbleDirection[1]) dx = 1;  
-				else if (isAbleDirection[3]) dx = -1; 
-				else if (isAbleDirection[0]) dy = -1; 
-			}
-			else if (my < 0 && !isAbleDirection[0]) {
-				if (isAbleDirection[1]) dx = 1;  
-				else if (isAbleDirection[3]) dx = -1; 
-				else if (isAbleDirection[2]) dy = 1; 
-			}
-		}
+	// 경로의 첫 번째 지점으로 NPC를 이동시킴
+	POINT nextStep = path[0];
+	int dx = nextStep.x - x;
+	int dy = nextStep.y - y;
+
+	if (is_obstacle(x + dx, y + dy)) {
+		return; 
 	}
 
+	// 이동
 	npc.x += dx;
 	npc.y += dy;
 
@@ -668,6 +701,7 @@ void do_npc_move(int npc_id, int player_id) {
 	std::unique_lock lock(npc._vl);
 	npc._view_list = new_vl;
 }
+
 
 
 //npc -> player 공격
@@ -948,13 +982,7 @@ void InitializeNPC()
 	cout << "NPC initialize end.\n";
 }
 
-struct pair_hash
-{
-	template <class T1, class T2>
-	std::size_t operator() (const std::pair<T1, T2>& pair) const {
-		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
-	}
-};
+
 void InitializeObstacle()
 {
 	cout << "obstacle initialize begin.\n";
@@ -1233,7 +1261,7 @@ void worker_thread(HANDLE h_iocp)
 
 				clients[key].x = rand() % W_WIDTH;
 				clients[key].y = rand() % W_HEIGHT;
-				
+
 				clients[key]._level = 1;
 				clients[key]._atk = 10;
 				clients[key]._exp = 0;
