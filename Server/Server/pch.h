@@ -34,6 +34,7 @@ enum S_STATE { ST_FREE, ST_ALLOC, ST_INGAME };
 #include "protocol.h"
 #include "OVERLAP.h"
 #include "SESSION.h"
+#include "Event.h"
 
 
 
@@ -45,7 +46,11 @@ extern OVER_EXP g_a_over;
 extern array<array<unordered_set<int>, SECTOR_ROWS>, SECTOR_COLS> g_sectors;
 extern array<array<mutex, SECTOR_ROWS>, SECTOR_COLS> sector_locks;
 extern array<Obstacle, MAX_OBSTACLE> obstacles;
+extern concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
+extern short g_x, g_y;
+
+extern concurrency::concurrent_queue<DB_EVENT> db_queue;
 
 bool is_pc(int object_id);
 

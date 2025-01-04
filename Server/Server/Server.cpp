@@ -1,31 +1,6 @@
 #include "pch.h"
 
 
-short g_x, g_y;
-
-struct TIMER_EVENT {
-	int obj_id;
-	chrono::system_clock::time_point wakeup_time;
-	EVENT_TYPE event_id;
-	int target_id;
-	constexpr bool operator < (const TIMER_EVENT& L) const
-	{
-		return (wakeup_time > L.wakeup_time);
-	}
-};
-concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
-
-struct DB_EVENT {
-	int client_id;                           // 작업 대상 클라이언트 ID
-	DB_TYPE db_type;                         // 작업 타입 (DB_LOAD, DB_SAVE)
-	std::string name;                        // 작업에 필요한 추가 데이터 (예: 유저 이름)
-};
-concurrency::concurrent_queue<DB_EVENT> db_queue;
-
-void show_err() {
-	cout << "error" << endl;
-}
-
 bool DB_odbc(int c_id, const char* name) {
 	SQLHENV henv;
 	SQLHDBC hdbc;
@@ -275,23 +250,6 @@ vector<POINT> AStarFindPath(int startX, int startY, int goalX, int goalY) {
 }
 
 
-void send_item_drop_packet(int type, int npc_id)
-{
-	SC_ITEM_DROP_PACKET p;
-	p.size = sizeof(p);
-	p.type = SC_ITEM_DROP;
-	p.itemType = type;
-	p.x = clients[npc_id].x;
-	p.y = clients[npc_id].y;
-	for (auto& pl : clients) {
-		{
-			lock_guard<mutex> ll(pl._s_lock);
-			if (ST_INGAME != pl._state) continue;
-		}
-		if (false == can_see(npc_id, pl._id)) continue;
-		if (is_pc(pl._id)) clients[pl._id].do_send(&p);
-	}
-}
 
 
 void WakeUpNPC(int npc_id, int waker)
@@ -795,10 +753,10 @@ int API_attack_npc(lua_State* L)
 			clients[my_id]._state = ST_FREE;
 			int item_type = rand() % 2;
 			if (item_type == 0) {
-				send_item_drop_packet(0, my_id);
+				clients[user_id].send_item_drop_packet(0, my_id);
 			}
 			else {
-				send_item_drop_packet(1, my_id);
+				clients[user_id].send_item_drop_packet(1, my_id);
 			}
 
 			clients[user_id]._exp += (clients[my_id]._level * 10);

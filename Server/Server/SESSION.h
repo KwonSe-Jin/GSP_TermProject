@@ -67,6 +67,8 @@ public:
 	void send_chat_packet(int c_id, const char* mess);
 	void send_stat_change_packet(int c_id);
 	void send_remove_player_packet(int c_id);
-	void send_add_obstacle_packet(int c_id);
+	void send_item_drop_packet(int type, int npc_id);
+	
+
 };
 

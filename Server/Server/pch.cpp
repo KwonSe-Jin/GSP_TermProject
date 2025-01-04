@@ -9,6 +9,11 @@ std::array<Obstacle, MAX_OBSTACLE> obstacles;
 SOCKET g_s_socket;
 SOCKET g_c_socket;
 OVER_EXP g_a_over;
+concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
+
+
+concurrency::concurrent_queue<DB_EVENT> db_queue;
+short g_x, g_y;
 
 
 bool is_pc(int object_id)

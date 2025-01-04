@@ -144,3 +144,21 @@ void SESSION::send_remove_player_packet(int c_id)
 	p.type = SC_REMOVE_OBJECT;
 	do_send(&p);
 }
+
+void SESSION::send_item_drop_packet(int type, int npc_id)
+{
+	SC_ITEM_DROP_PACKET p;
+	p.size = sizeof(p);
+	p.type = SC_ITEM_DROP;
+	p.itemType = type;
+	p.x = clients[npc_id].x;
+	p.y = clients[npc_id].y;
+	for (auto& pl : clients) {
+		{
+			lock_guard<mutex> ll(pl._s_lock);
+			if (ST_INGAME != pl._state) continue;
+		}
+		if (false == can_see(npc_id, pl._id)) continue;
+		if (is_pc(pl._id)) clients[pl._id].do_send(&p);
+	}
+}
