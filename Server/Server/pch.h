@@ -59,6 +59,12 @@ bool is_obstacle(short x, short y);
 bool can_see(int from, int to);
 bool is_range(int range, int from, int to);
 bool is_adjacent(int range, int from, int to);
-
+struct pair_hash
+{
+	template <class T1, class T2>
+	std::size_t operator() (const std::pair<T1, T2>& pair) const {
+		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
+	}
+};
 #include "DB.h"
 #include "AStar.h"
