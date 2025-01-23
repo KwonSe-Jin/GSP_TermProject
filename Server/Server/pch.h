@@ -60,3 +60,5 @@ bool can_see(int from, int to);
 bool is_range(int range, int from, int to);
 bool is_adjacent(int range, int from, int to);
 
+#include "DB.h"
+#include "AStar.h"
