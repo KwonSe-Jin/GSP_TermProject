@@ -35,7 +35,8 @@ enum S_STATE { ST_FREE, ST_ALLOC, ST_INGAME };
 #include "OVERLAP.h"
 #include "SESSION.h"
 #include "Event.h"
-
+#include "DB.h"
+#include "AStar.h"
 
 
 extern HANDLE h_iocp;
@@ -66,5 +67,3 @@ struct pair_hash
 		return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second);
 	}
 };
-#include "DB.h"
-#include "AStar.h"

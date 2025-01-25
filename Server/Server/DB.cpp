@@ -1,6 +1,9 @@
+#include "pch.h"
 #include "DB.h"
 
-bool DB_odbc(int c_id, const char* name) {
+bool DB::DB_odbc(int c_id, const char* name)
+{
+
 	SQLHENV henv;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt = 0;
@@ -100,9 +103,12 @@ bool DB_odbc(int c_id, const char* name) {
 	}
 
 	return false;
+
 }
 
-bool DB_save(int c_id) {
+bool DB::DB_save(int c_id)
+{
+
 	SQLHENV henv;
 	SQLHDBC hdbc;
 	SQLHSTMT hstmt = 0;
@@ -171,5 +177,5 @@ bool DB_save(int c_id) {
 	}
 
 	return (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO);
-}
 
+}

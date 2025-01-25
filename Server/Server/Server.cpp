@@ -784,10 +784,11 @@ void do_timer()
 void do_DB() {
 	while (true) {
 		DB_EVENT db_event;
+		DB& db = DB::getInstance();
 		if (db_queue.try_pop(db_event)) {
 			switch (db_event.db_type) {
 			case DB_LOGIN: {
-				if (DB_odbc(db_event.client_id, db_event.name.c_str())) {
+				if (db.DB_odbc(db_event.client_id, db_event.name.c_str())) {
 					cout << "¼º°ø" << endl;
 					OVER_EXP* ov = new OVER_EXP;
 					ov->_comp_type = OP_LOGIN_SUCC;
@@ -802,7 +803,7 @@ void do_DB() {
 				break;
 			}
 			case DB_SAVE: {
-				DB_save(db_event.client_id);
+				db.DB_save(db_event.client_id);
 				break;
 			}
 			}
