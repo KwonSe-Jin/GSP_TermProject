@@ -20,7 +20,3 @@ extern int heuristic(int x1, int y1, int x2, int y2);
 // A* 알고리즘을 사용하여 경로를 찾는 함수
 extern vector<POINT> AStarFindPath(int startX, int startY, int goalX, int goalY);
 
-class AStar
-{
-};
-
