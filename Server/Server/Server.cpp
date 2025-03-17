@@ -306,8 +306,6 @@ void disconnect(int c_id)
 
 
 // NPC 이동함수
-
-
 void do_npc_move(int npc_id, int player_id) {
 	SESSION& npc = clients[npc_id];
 	SESSION& player = clients[player_id];
