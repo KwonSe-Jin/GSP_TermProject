@@ -129,25 +129,39 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AStar.cpp" />
+    <ClCompile Include="ClientManager.cpp" />
     <ClCompile Include="DB.cpp" />
+    <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="LuaManager.cpp" />
+    <ClCompile Include="NPCManager.cpp" />
+    <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="OVERLAP.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SESSION.cpp" />
+    <ClCompile Include="TimerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AStar.h" />
+    <ClInclude Include="ClientManager.h" />
     <ClInclude Include="DB.h" />
+    <ClInclude Include="DBManager.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="GameServer.h" />
     <ClInclude Include="include\lauxlib.h" />
     <ClInclude Include="include\lua.h" />
     <ClInclude Include="include\lua.hpp" />
     <ClInclude Include="include\luaconf.h" />
     <ClInclude Include="include\lualib.h" />
+    <ClInclude Include="LuaManager.h" />
+    <ClInclude Include="NPCManager.h" />
+    <ClInclude Include="ObstacleManager.h" />
     <ClInclude Include="OVERLAP.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="SESSION.h" />
+    <ClInclude Include="TimerManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lua54.lib" />

@@ -51,8 +51,6 @@ extern concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
 extern short g_x, g_y;
 
-extern concurrency::concurrent_queue<DB_EVENT> db_queue;
-
 bool is_pc(int object_id);
 
 bool is_npc(int object_id);

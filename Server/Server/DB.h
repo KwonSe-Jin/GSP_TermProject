@@ -5,6 +5,7 @@
 class DB {
 public:
     // 싱글톤 인스턴스 가져오기
+    
     static DB& getInstance() {
         static DB instance; // 정적 인스턴스
         return instance;
