@@ -15,30 +15,27 @@
     <Filter Include="DB">
       <UniqueIdentifier>{87303012-c012-48a4-9d02-fd9419292007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NPC">
+      <UniqueIdentifier>{ecff4190-87d2-4c1a-97f4-452e52d237dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{f598544c-ee2a-42d0-b556-242d07326b7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{d7b07a3a-4d5e-42ec-91a0-66c703cdaab1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{c752e5c3-a920-438e-a11a-665649740ebf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Obstacle">
+      <UniqueIdentifier>{c7578a25-144b-43dd-b277-165ef9117e45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Server.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SESSION.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="OVERLAP.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="AStar.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ClientManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="NPCManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="DB.cpp">
@@ -47,14 +44,32 @@
     <ClCompile Include="DBManager.cpp">
       <Filter>DB</Filter>
     </ClCompile>
-    <ClCompile Include="TimerManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="LuaManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="NPCManager.cpp">
+      <Filter>NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="AStar.cpp">
+      <Filter>NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientManager.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="SESSION.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerManager.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Server</Filter>
     </ClCompile>
     <ClCompile Include="ObstacleManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Obstacle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,22 +97,7 @@
     <ClInclude Include="include\lualib.h">
       <Filter>lua</Filter>
     </ClInclude>
-    <ClInclude Include="SESSION.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Event.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="AStar.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ClientManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="NPCManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DB.h">
@@ -106,14 +106,29 @@
     <ClInclude Include="DBManager.h">
       <Filter>DB</Filter>
     </ClInclude>
-    <ClInclude Include="TimerManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="LuaManager.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="NPCManager.h">
+      <Filter>NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientManager.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="SESSION.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerManager.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="ObstacleManager.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Obstacle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
