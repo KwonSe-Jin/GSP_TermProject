@@ -2,7 +2,6 @@
 
 void DBManager::ProcessDB()
 {
-	cout << "[DBManager] ProcessDB ½ÃÀÛ" << endl;
 
 	while (true) {
 		DB_EVENT db_event;

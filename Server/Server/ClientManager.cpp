@@ -387,9 +387,9 @@ void ClientManager::ProcessPacket(int client_id, char* packet)
 			clients[client_id]._sector_y = new_sector_y;
 		}
 
-		unordered_set<int> near_list;
+		unordered_set<int> near_list; // 새로운 시야에 들어온 오브젝트를 관리하는 리스트
 		clients[client_id]._vl.lock();
-		unordered_set<int> old_vlist = clients[client_id]._view_list;
+		unordered_set<int> old_vlist = clients[client_id]._view_list;// 기존 시야 리스트 
 		clients[client_id]._vl.unlock();
 
 		for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); ++y) {
@@ -398,8 +398,8 @@ void ClientManager::ProcessPacket(int client_id, char* packet)
 				for (int cl_id : g_sectors[x][y]) {
 					if (clients[cl_id]._state != ST_INGAME) continue;
 					if (cl_id == client_id) continue;
-					if (can_see(client_id, cl_id))
-						near_list.insert(cl_id);
+					if (can_see(client_id, cl_id)) // 시야 범위 안의 객체만 추가 
+						near_list.insert(cl_id); 
 				}
 			}
 		}
