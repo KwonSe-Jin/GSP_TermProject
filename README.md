@@ -1,9 +1,6 @@
 # GSP_TermProject
 2024한국공학대 게임서버프로그래밍 텀프로젝트
 
-개발 기간 
- - 2024. 6
-   2024. 12 ~ 2025. 1 추가 구현
 사용 도구
  - C++, IOCP, SFML, MSSQL, Lua script
 
