@@ -40,6 +40,7 @@ public:
 
     void StartThreads() {
         int num_threads = std::thread::hardware_concurrency();
+        cout << num_threads;
         for (int i = 0; i < num_threads; ++i)
             worker_threads.emplace_back([&]() { WorkerThread(); });
 
@@ -77,7 +78,7 @@ public:
                 }
             }
 
-            if ((0 == num_bytes) && ((ex_over->_comp_type == OP_RECV) || (ex_over->_comp_type == OP_SEND))) {
+            if ((num_bytes == 0) && ((ex_over->_comp_type == OP_RECV) || (ex_over->_comp_type == OP_SEND))) {
                 ClientManager::GetInstance()->Disconnect(static_cast<int>(key));
                 if (ex_over->_comp_type == OP_SEND) delete ex_over;
                 continue;

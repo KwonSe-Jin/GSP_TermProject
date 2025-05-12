@@ -125,8 +125,8 @@ void NPCManager::DoNPCMove(int npc_id, int player_id)
 	}
 
 	unordered_set<int> new_vl;
-	for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); ++y) {
-		for (int x = max(new_sector_x - 1, 0); x <= min(new_sector_x + 1, SECTOR_COLS - 1); ++x) {
+	for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); y++) {
+		for (int x = max(new_sector_x - 1, 0); x <= min(new_sector_x + 1, SECTOR_COLS - 1); x++) {
 			lock_guard<mutex> lock(sector_locks[x][y]);
 			for (int cl_id : g_sectors[x][y]) {
 				if (clients[cl_id]._state != ST_INGAME) continue;

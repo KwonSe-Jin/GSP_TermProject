@@ -127,8 +127,8 @@ void ClientManager::ProcessIO(int client_id, OVER_EXP* ex_over, DWORD num_bytes)
 		clients[client_id].send_login_info_packet();
 
 		//  주변 객체 알림
-		for (int y = max(clients[client_id]._sector_y - 1, 0); y <= min(clients[client_id]._sector_y + 1, SECTOR_ROWS - 1); ++y) {
-			for (int x = max(clients[client_id]._sector_x - 1, 0); x <= min(clients[client_id]._sector_x + 1, SECTOR_COLS - 1); ++x) {
+		for (int y = max(clients[client_id]._sector_y - 1, 0); y <= min(clients[client_id]._sector_y + 1, SECTOR_ROWS - 1); y++) {
+			for (int x = max(clients[client_id]._sector_x - 1, 0); x <= min(clients[client_id]._sector_x + 1, SECTOR_COLS - 1); x++) {
 				lock_guard<mutex> lock(sector_locks[x][y]);
 				for (int p_id : g_sectors[x][y]) {
 					{
@@ -392,8 +392,8 @@ void ClientManager::ProcessPacket(int client_id, char* packet)
 		unordered_set<int> old_vlist = clients[client_id]._view_list;// 기존 시야 리스트 
 		clients[client_id]._vl.unlock();
 
-		for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); ++y) {
-			for (int x = max(new_sector_x - 1, 0); x <= min(new_sector_x + 1, SECTOR_COLS - 1); ++x) {
+		for (int y = max(new_sector_y - 1, 0); y <= min(new_sector_y + 1, SECTOR_ROWS - 1); y++) {
+			for (int x = max(new_sector_x - 1, 0); x <= min(new_sector_x + 1, SECTOR_COLS - 1); x++) {
 				lock_guard<mutex> lock(sector_locks[x][y]);
 				for (int cl_id : g_sectors[x][y]) {
 					if (clients[cl_id]._state != ST_INGAME) continue;
@@ -428,7 +428,7 @@ void ClientManager::ProcessPacket(int client_id, char* packet)
 		}
 
 		for (auto& pl : old_vlist) {
-			if (0 == near_list.count(pl)) {
+			if ( near_list.count(pl) == 0) {
 				clients[client_id].send_remove_player_packet(pl);
 				if (is_pc(pl))
 					clients[pl].send_remove_player_packet(client_id);
@@ -465,8 +465,8 @@ void ClientManager::HandleLoginSuccess(int client_id)
 	clients[client_id].send_inventory_packet(client_id);
 
 	// 주변 객체 알림
-	for (int y = max(clients[client_id]._sector_y - 1, 0); y <= min(clients[client_id]._sector_y + 1, SECTOR_ROWS - 1); ++y) {
-		for (int x = max(clients[client_id]._sector_x - 1, 0); x <= min(clients[client_id]._sector_x + 1, SECTOR_COLS - 1); ++x) {
+	for (int y = max(clients[client_id]._sector_y - 1, 0); y <= min(clients[client_id]._sector_y + 1, SECTOR_ROWS - 1); y++) {
+		for (int x = max(clients[client_id]._sector_x - 1, 0); x <= min(clients[client_id]._sector_x + 1, SECTOR_COLS - 1); x++) {
 			lock_guard<mutex> lock(sector_locks[x][y]);
 			for (int p_id : g_sectors[x][y]) {
 				{
